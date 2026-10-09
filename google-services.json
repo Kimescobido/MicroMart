@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269876208282",
+    "project_id": "micromart-1f8ec",
+    "storage_bucket": "micromart-1f8ec.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269876208282:android:1dacd84ba211166fb17523",
+        "android_client_info": {
+          "package_name": "com.company.MicroMart"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWfaf40HFVNSpbDN2qrsGS_eJEhOt3-KQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
