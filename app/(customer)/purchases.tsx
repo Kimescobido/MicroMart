@@ -12,6 +12,7 @@ const PURCHASE_FILTERS = [
   { key: "to-ship", label: "To Ship", icon: "cube-outline" as const },
   { key: "to-receive", label: "To Receive", icon: "bicycle-outline" as const },
   { key: "cop", label: "COP", icon: "storefront-outline" as const },
+  { key: "completed", label: "Completed", icon: "checkmark-circle-outline" as const },
 ];
 
 export default function PurchasesScreen() {
@@ -79,7 +80,7 @@ export default function PurchasesScreen() {
   const renderOrder = ({ item }: { item: StoreOrder }) => {
     const itemNames = item.items.map((orderItem) => `${orderItem.name} × ${orderItem.quantity}`).join(" · ");
     const dateValue = typeof item.createdAt === "number" ? item.createdAt : item.createdAt?.toMillis?.() ?? Date.now();
-    const statusLabel = item.status === "pending_confirmation" ? "Waiting for shop confirmation" : item.status === "to_receive" ? "On the way" : item.status === "to_ship" ? "Preparing order" : item.status === "cop" ? "Awaiting pickup" : item.paymentMethod === "PAYPAL" && item.status === "to_pay" ? "Ready for PayPal payment" : "Awaiting payment";
+    const statusLabel = item.status === "completed" ? "Completed" : item.status === "pending_confirmation" ? "Waiting for shop confirmation" : item.status === "to_receive" ? "On the way" : item.status === "to_ship" ? "Preparing order" : item.status === "cop" ? "Awaiting pickup" : item.paymentMethod === "PAYPAL" && item.status === "to_pay" ? "Ready for PayPal payment" : "Awaiting payment";
     return (
       <View style={styles.orderCard}>
         <View style={styles.orderTopRow}>

@@ -14,7 +14,6 @@ interface CartContextType {
   clearCart: () => void;
   cartTotal: number;
   cartItemCount: number;
-  hasVoltageMismatch: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -57,12 +56,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const hasVoltageMismatch = cart.some(item => item.voltage === '3.3V') && 
-                             cart.some(item => item.voltage === '5V');
-
   return (
     <CartContext.Provider 
-      value={{ cart, addToCart, decreaseQuantity, removeFromCart, clearCart, cartTotal, cartItemCount, hasVoltageMismatch }}
+      value={{ cart, addToCart, decreaseQuantity, removeFromCart, clearCart, cartTotal, cartItemCount }}
     >
       {children}
     </CartContext.Provider>

@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../src/context/AuthContext";
 import { useCart } from "../../src/context/CartContext";
+import { VoltageCompatibilityNotice } from "../../src/components/VoltageCompatibilityNotice";
 import { getCustomerProfile, CustomerAddress } from "../../src/services/customerProfileService";
 import { createCustomerOrder, FulfillmentType, OrderCheckoutError, PaymentMethod, PICKUP_POINT_LABEL } from "../../src/services/orderService";
 
@@ -61,7 +62,7 @@ const FULFILLMENT_OPTIONS: { id: FulfillmentType; title: string; subtitle: strin
 export default function CheckoutScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const { cart, cartTotal, hasVoltageMismatch, clearCart } = useCart();
+  const { cart, cartTotal, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("COD");
   const [fulfillmentType, setFulfillmentType] = useState<FulfillmentType>("delivery");
   const [deliveryAddress, setDeliveryAddress] = useState<CustomerAddress | null>(null);
@@ -262,14 +263,7 @@ export default function CheckoutScreen() {
           )}
         </View>
 
-        {hasVoltageMismatch && (
-          <View style={styles.warningCard}>
-            <Ionicons name="warning-outline" size={19} color="#932D2C" />
-            <Text style={styles.warningText}>
-              Your cart has both 3.3V and 5V components. Check compatibility before ordering.
-            </Text>
-          </View>
-        )}
+        <VoltageCompatibilityNotice items={cart} />
 
         <Text style={[styles.sectionTitle, styles.orderTitle]}>Order summary</Text>
         <View style={styles.summaryCard}>

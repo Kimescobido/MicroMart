@@ -332,7 +332,7 @@ export const completePickupOrder = async (orderId: string) => {
 
 export const watchCustomerOrderCounts = (
   customerId: string,
-  onCounts: (counts: Record<"to_pay" | "to_ship" | "to_receive" | "cop", number>) => void,
+  onCounts: (counts: Record<"to_pay" | "to_ship" | "to_receive" | "cop" | "completed", number>) => void,
   onError?: (error: Error) => void,
 ): Unsubscribe => watchCustomerOrders(customerId, (orders) => {
   onCounts({
@@ -340,5 +340,6 @@ export const watchCustomerOrderCounts = (
     to_ship: orders.filter((order) => order.status === "to_ship").length,
     to_receive: orders.filter((order) => order.status === "to_receive").length,
     cop: orders.filter((order) => order.status === "cop").length,
+    completed: orders.filter((order) => order.status === "completed").length,
   });
 }, onError);

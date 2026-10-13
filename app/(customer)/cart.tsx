@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCart } from "../../src/context/CartContext";
+import { VoltageCompatibilityNotice } from "../../src/components/VoltageCompatibilityNotice";
 
 export default function CartScreen() {
   const router = useRouter();
@@ -22,7 +23,6 @@ export default function CartScreen() {
     decreaseQuantity,
     removeFromCart,
     cartTotal,
-    hasVoltageMismatch,
   } = useCart();
 
   const handleCheckout = () => {
@@ -101,18 +101,7 @@ export default function CartScreen() {
         <Text style={styles.itemCountText}>{cart.length} items</Text>
       </View>
 
-      {/* COMPATIBILITY ENGINE WARNING BANNER */}
-      {hasVoltageMismatch && (
-        <View style={styles.warningBanner}>
-          <Ionicons name="warning-outline" size={20} color="#932D2C" />
-          <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={styles.warningTitle}>Voltage Mismatch Detected</Text>
-            <Text style={styles.warningDesc}>
-              You have both 3.3V and 5V parts in your cart.
-            </Text>
-          </View>
-        </View>
-      )}
+      <VoltageCompatibilityNotice items={cart} style={styles.compatibilityNotice} />
 
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -175,19 +164,7 @@ const styles = StyleSheet.create({
   },
   itemCountText: { fontSize: 14, color: "#A09F9B", fontWeight: "500" },
 
-  warningBanner: {
-    flexDirection: "row",
-    backgroundColor: "#F9EBEA",
-    borderWidth: 1,
-    borderColor: "#F5B7B1",
-    marginHorizontal: 20,
-    padding: 12,
-    borderRadius: 16,
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  warningTitle: { fontSize: 13, fontWeight: "bold", color: "#932D2C" },
-  warningDesc: { fontSize: 12, color: "#78281F", marginTop: 2 },
+  compatibilityNotice: { marginHorizontal: 20 },
 
   listContent: { paddingHorizontal: 20, paddingBottom: 20 },
   cartCard: {

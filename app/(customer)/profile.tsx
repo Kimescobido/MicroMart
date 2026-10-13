@@ -43,6 +43,7 @@ const ORDER_STATUSES = [
   { label: "To Ship", key: "to_ship" as const, icon: "cube-outline" as const },
   { label: "To Receive", key: "to_receive" as const, icon: "bicycle-outline" as const },
   { label: "COP Orders", key: "cop" as const, icon: "storefront-outline" as const },
+  { label: "Completed", key: "completed" as const, icon: "checkmark-circle-outline" as const },
 ];
 
 const ADDRESS_FIELDS: { key: keyof CustomerAddress; label: string; placeholder: string }[] = [
@@ -63,11 +64,11 @@ export default function ProfileScreen() {
   const [isLoadingAddress, setIsLoadingAddress] = useState(true);
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [orderCounts, setOrderCounts] = useState({ to_pay: 0, to_ship: 0, to_receive: 0, cop: 0 });
+  const [orderCounts, setOrderCounts] = useState({ to_pay: 0, to_ship: 0, to_receive: 0, cop: 0, completed: 0 });
 
   useEffect(() => {
     if (!user?.uid) {
-      setOrderCounts({ to_pay: 0, to_ship: 0, to_receive: 0, cop: 0 });
+      setOrderCounts({ to_pay: 0, to_ship: 0, to_receive: 0, cop: 0, completed: 0 });
       return;
     }
     return watchCustomerOrderCounts(user.uid, setOrderCounts, (error) => {
@@ -361,11 +362,11 @@ const styles = StyleSheet.create({
   sectionTitle: { color: "#24211D", fontSize: 16, fontWeight: "700" },
   viewAll: { color: "#932D2C", fontSize: 11, fontWeight: "600" },
   statusRow: { flexDirection: "row", justifyContent: "space-around" },
-  statusItem: { width: "25%", alignItems: "center", paddingHorizontal: 2 },
+  statusItem: { width: "20%", alignItems: "center", paddingHorizontal: 2 },
   statusIconWrap: { width: 34, height: 32, alignItems: "center", justifyContent: "center", marginBottom: 6 },
   countBadge: { position: "absolute", right: -4, top: -3, minWidth: 16, height: 16, borderRadius: 8, backgroundColor: "#932D2C", borderWidth: 1.5, borderColor: "#FFFFFF", alignItems: "center", justifyContent: "center", paddingHorizontal: 3 },
   countText: { color: "#FFFFFF", fontSize: 8, fontWeight: "700" },
-  statusLabel: { color: "#57514B", fontSize: 10, textAlign: "center", fontWeight: "500" },
+  statusLabel: { color: "#57514B", fontSize: 9, textAlign: "center", fontWeight: "500" },
   sectionHeaderAddress: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 11 },
   addAddressButton: { flexDirection: "row", alignItems: "center", gap: 3, paddingVertical: 5, paddingLeft: 8 },
   addAddressText: { color: "#932D2C", fontSize: 12, fontWeight: "600" },

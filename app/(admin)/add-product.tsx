@@ -29,7 +29,13 @@ export default function AddProductScreen() {
   const [newStock, setNewStock] = useState("");
   const [newCategory, setNewCategory] = useState("Microcontroller");
   const [newVoltage, setNewVoltage] = useState("3.3V");
+  const [compatibleBoards, setCompatibleBoards] = useState("");
+  const [interfaces, setInterfaces] = useState("");
+  const [currentRequirement, setCurrentRequirement] = useState("");
+  const [specifications, setSpecifications] = useState("");
   const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const parseTags = (value: string) => Array.from(new Set(value.split(",").map((entry) => entry.trim()).filter(Boolean)));
 
   useEffect(() => {
     if (!productId) return;
@@ -45,6 +51,10 @@ export default function AddProductScreen() {
       setNewStock(String(product.stock));
       setNewCategory(product.category);
       setNewVoltage(product.voltage);
+      setCompatibleBoards(product.compatibleBoards?.join(", ") ?? "");
+      setInterfaces(product.interfaces?.join(", ") ?? "");
+      setCurrentRequirement(product.currentRequirement ?? "");
+      setSpecifications(product.specifications ?? "");
       setImageUri(product.imageUrl || null);
     }).catch(() => {
       if (active) Alert.alert("Couldn't load product", "Check your connection and try again.");
@@ -91,6 +101,10 @@ export default function AddProductScreen() {
         stock,
         category: newCategory,
         voltage: newVoltage,
+        compatibleBoards: parseTags(compatibleBoards),
+        interfaces: parseTags(interfaces),
+        currentRequirement: currentRequirement.trim(),
+        specifications: specifications.trim(),
       };
       if (productId) await updateProduct(productId, productData, imageUri);
       else await addProduct(productData, imageUri);
@@ -188,6 +202,42 @@ export default function AddProductScreen() {
           ))}
         </View>
 
+        <Text style={styles.inputLabel}>Compatible boards (comma-separated)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ESP32, Arduino Uno, Raspberry Pi Pico"
+          value={compatibleBoards}
+          onChangeText={setCompatibleBoards}
+          autoCapitalize="words"
+        />
+
+        <Text style={styles.inputLabel}>Interface / protocol (comma-separated)</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="I2C, SPI, UART, GPIO"
+          value={interfaces}
+          onChangeText={setInterfaces}
+          autoCapitalize="characters"
+        />
+
+        <Text style={styles.inputLabel}>Current requirement</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 20 mA typical, 100 mA maximum"
+          value={currentRequirement}
+          onChangeText={setCurrentRequirement}
+        />
+
+        <Text style={styles.inputLabel}>Technical specifications</Text>
+        <TextInput
+          style={[styles.input, styles.multilineInput]}
+          placeholder="Pin count, operating range, dimensions, or other useful specs"
+          value={specifications}
+          onChangeText={setSpecifications}
+          multiline
+          textAlignVertical="top"
+        />
+
         <Text style={styles.inputLabel}>Logic/Operating Voltage</Text>
         <View style={styles.chipRow}>
           {["3.3V", "5V", "12V", "Any"].map((volt) => (
@@ -276,6 +326,7 @@ const styles = StyleSheet.create({
     color: "#2C2B27",
     marginBottom: 8,
   },
+  multilineInput: { minHeight: 90, paddingTop: 12 },
   rowInputs: { flexDirection: "row", justifyContent: "space-between" },
 
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 8 },

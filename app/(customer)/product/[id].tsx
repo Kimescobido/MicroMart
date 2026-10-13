@@ -176,10 +176,39 @@ export default function ProductDetailsScreen() {
           <View style={styles.compatibilityBox}>
             <Ionicons name="flash-outline" size={20} color="#932D2C" />
             <Text style={styles.compatibilityText}>
-              Requires {product.voltage} logic. Use a level shifter if mixing
-              3.3V and 5V boards.
+              Listed operating voltage: {product.voltage}. Confirm your board&apos;s logic level before connecting; use a level shifter when signal levels differ.
             </Text>
           </View>
+
+          {(product.compatibleBoards?.length || product.interfaces?.length || product.currentRequirement || product.specifications) ? (
+            <View style={styles.specificationsCard}>
+              <Text style={styles.sectionTitle}>BOARD & INTERFACE DETAILS</Text>
+              {product.compatibleBoards?.length ? (
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Compatible boards</Text>
+                  <Text style={styles.specValue}>{product.compatibleBoards.join(", ")}</Text>
+                </View>
+              ) : null}
+              {product.interfaces?.length ? (
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Interface / protocol</Text>
+                  <Text style={styles.specValue}>{product.interfaces.join(", ")}</Text>
+                </View>
+              ) : null}
+              {product.currentRequirement ? (
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Current requirement</Text>
+                  <Text style={styles.specValue}>{product.currentRequirement}</Text>
+                </View>
+              ) : null}
+              {product.specifications ? (
+                <View style={styles.specRow}>
+                  <Text style={styles.specLabel}>Specifications</Text>
+                  <Text style={styles.specValue}>{product.specifications}</Text>
+                </View>
+              ) : null}
+            </View>
+          ) : null}
 
           <View style={{ height: 100 }} />
         </ScrollView>
@@ -347,6 +376,10 @@ const styles = StyleSheet.create({
     color: "#4A4A4A",
     lineHeight: 18,
   },
+  specificationsCard: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 15, marginTop: 18, borderWidth: 1, borderColor: "#EAE6DF" },
+  specRow: { borderTopWidth: 1, borderTopColor: "#F0EDE7", paddingTop: 10, marginTop: 9 },
+  specLabel: { color: "#8F8982", fontSize: 10, fontWeight: "700", marginBottom: 4 },
+  specValue: { color: "#24211D", fontSize: 13, lineHeight: 19 },
 
   bottomBarContainer: {
     position: "absolute",

@@ -1,6 +1,6 @@
 // src/services/productService.ts
 import { db, storage } from './firebaseConfig';
-import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, updateDoc, deleteDoc, doc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, orderBy, updateDoc, deleteDoc, doc, getDoc, onSnapshot, type Unsubscribe } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export interface Product {
@@ -10,6 +10,10 @@ export interface Product {
   stock: number;
   category: string;
   voltage: string;
+  compatibleBoards?: string[];
+  interfaces?: string[];
+  currentRequirement?: string;
+  specifications?: string;
   imageUrl?: string; // We added the imageUrl field here!
   soldCount?: number;
   createdAt?: any;
@@ -85,7 +89,17 @@ export const getProductById = async (id: string) => {
   }
 };
 
-export type EditableProduct = Pick<Product, "name" | "price" | "stock" | "category" | "voltage">;
+export const watchProducts = (
+  onProducts: (products: Product[]) => void,
+  onError?: (error: Error) => void,
+): Unsubscribe => onSnapshot(
+  query(collection(db, 'products'), orderBy('createdAt', 'desc')),
+  (snapshot) => onProducts(snapshot.docs.map((productDoc) => ({ id: productDoc.id, ...productDoc.data() }) as Product)),
+  (error) => onError?.(error),
+);
+
+export type EditableProduct = Pick<Product, "name" | "price" | "stock" | "category" | "voltage">
+  & Pick<Product, "compatibleBoards" | "interfaces" | "currentRequirement" | "specifications">;
 
 export const updateProduct = async (id: string, productData: EditableProduct, imageUri: string | null) => {
   let imageUrl: string | undefined;

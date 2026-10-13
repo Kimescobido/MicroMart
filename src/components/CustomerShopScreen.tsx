@@ -38,6 +38,8 @@ export default function CustomerShopScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedVoltage, setSelectedVoltage] = useState("All");
+  const [selectedBoard, setSelectedBoard] = useState("All");
   const [sortMode, setSortMode] = useState<"Popular" | "Latest" | "Best Sellers" | "Price">("Popular");
   const [priceDescending, setPriceDescending] = useState(false);
   const cardWidth = (width - 48) / 2;
@@ -76,18 +78,37 @@ export default function CustomerShopScreen() {
     [sourceProducts],
   );
 
+  const voltageOptions = useMemo(() => [
+    "All",
+    ...Array.from(new Set(sourceProducts.map((product) => product.voltage?.trim()).filter((voltage): voltage is string => Boolean(voltage)))),
+  ], [sourceProducts]);
+  const boardOptions = useMemo(() => [
+    "All",
+    ...Array.from(new Set(sourceProducts.flatMap((product) => product.compatibleBoards ?? []).filter(Boolean))),
+  ], [sourceProducts]);
+
   const filteredProducts = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
     return sourceProducts.filter((product) => {
       const matchesCategory =
         selectedCategory === "All" || product.category === selectedCategory;
+      const matchesVoltage = selectedVoltage === "All" || product.voltage?.toLowerCase() === selectedVoltage.toLowerCase();
+      const matchesBoard = selectedBoard === "All" || product.compatibleBoards?.some((board) => board.toLowerCase() === selectedBoard.toLowerCase());
+      const searchableDetails = [
+        product.name,
+        product.category,
+        product.voltage,
+        product.compatibleBoards?.join(" "),
+        product.interfaces?.join(" "),
+        product.currentRequirement,
+        product.specifications,
+      ].filter(Boolean).join(" ").toLowerCase();
       const matchesSearch =
         !normalizedSearch ||
-        product.name.toLowerCase().includes(normalizedSearch) ||
-        product.category.toLowerCase().includes(normalizedSearch);
-      return matchesCategory && matchesSearch;
+        searchableDetails.includes(normalizedSearch);
+      return matchesCategory && matchesVoltage && matchesBoard && matchesSearch;
     });
-  }, [sourceProducts, search, selectedCategory]);
+  }, [sourceProducts, search, selectedCategory, selectedVoltage, selectedBoard]);
 
   const sortedProducts = useMemo(() => {
     const items = [...filteredProducts];
@@ -132,9 +153,14 @@ export default function CustomerShopScreen() {
           clearButtonMode="while-editing"
         />
         <TouchableOpacity
-          accessibilityLabel="Reset category filter"
+          accessibilityLabel="Clear product filters"
           style={styles.filterButton}
-          onPress={() => setSelectedCategory("All")}
+          onPress={() => {
+            setSearch("");
+            setSelectedCategory("All");
+            setSelectedVoltage("All");
+            setSelectedBoard("All");
+          }}
         >
           <Ionicons name="options-outline" size={19} color={ACCENT} />
         </TouchableOpacity>
@@ -183,16 +209,71 @@ export default function CustomerShopScreen() {
           );
         }}
       />
+      <View style={styles.attributeFilters}>
+        <View style={styles.attributeFilterRow}>
+          <Text style={styles.attributeFilterLabel}>Voltage</Text>
+          <FlatList
+            horizontal
+            data={voltageOptions}
+            keyExtractor={(item) => `voltage-${item}`}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.attributeChipList}
+            renderItem={({ item }) => {
+              const active = selectedVoltage === item;
+              return (
+                <TouchableOpacity
+                  style={[styles.attributeChip, active && styles.attributeChipActive]}
+                  onPress={() => setSelectedVoltage(item)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.attributeChipText, active && styles.attributeChipTextActive]}>{item}</Text>
+                </TouchableOpacity>
+              );
+            }}
+          />
+        </View>
+        {boardOptions.length > 1 ? (
+          <View style={styles.attributeFilterRow}>
+            <Text style={styles.attributeFilterLabel}>Board</Text>
+            <FlatList
+              horizontal
+              data={boardOptions}
+              keyExtractor={(item) => `board-${item}`}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.attributeChipList}
+              renderItem={({ item }) => {
+                const active = selectedBoard === item;
+                return (
+                  <TouchableOpacity
+                    style={[styles.attributeChip, active && styles.attributeChipActive]}
+                    onPress={() => setSelectedBoard(item)}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: active }}
+                  >
+                    <Text style={[styles.attributeChipText, active && styles.attributeChipTextActive]} numberOfLines={1}>{item}</Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
+        ) : null}
+      </View>
       <View style={styles.productsHeading}>
         <View>
           <Text style={styles.sectionTitle}>{selectedCategory === "All" ? "All products" : selectedCategory}</Text>
           <Text style={styles.sectionCaption}>{filteredProducts.length} {filteredProducts.length === 1 ? "item" : "items"} available</Text>
         </View>
-        {selectedCategory !== "All" && (
-          <TouchableOpacity onPress={() => setSelectedCategory("All")}>
+        {(selectedCategory !== "All" || selectedVoltage !== "All" || selectedBoard !== "All" || search.length > 0) ? (
+          <TouchableOpacity onPress={() => {
+            setSelectedCategory("All");
+            setSelectedVoltage("All");
+            setSelectedBoard("All");
+            setSearch("");
+          }}>
             <Text style={styles.clearFilter}>Clear filter</Text>
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
     </View>
   );
@@ -237,6 +318,9 @@ export default function CustomerShopScreen() {
       <View style={styles.productBottomRow}>
         <View>
           <Text style={styles.productPrice}>{"\u20B1"}{item.price.toFixed(2)}</Text>
+          <Text style={styles.specMeta} numberOfLines={1}>
+            {[item.voltage, ...(item.compatibleBoards ?? []).slice(0, 1)].filter(Boolean).join(" · ")}
+          </Text>
           <Text style={styles.stockText}>
             {item.soldCount !== undefined && item.soldCount > 0
               ? `${item.soldCount} sold`
@@ -478,6 +562,14 @@ const styles = StyleSheet.create({
   categoryChipActive: {},
   categoryChipText: { color: INK, fontSize: 9, fontWeight: "600", textAlign: "center" },
   categoryChipTextActive: { color: ACCENT },
+  attributeFilters: { paddingHorizontal: 18, marginBottom: 13, gap: 7 },
+  attributeFilterRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  attributeFilterLabel: { width: 52, color: MUTED, fontSize: 10, fontWeight: "700" },
+  attributeChipList: { gap: 6 },
+  attributeChip: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 12, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E6E0D9", maxWidth: 150 },
+  attributeChipActive: { backgroundColor: ACCENT, borderColor: ACCENT },
+  attributeChipText: { color: MUTED, fontSize: 10, fontWeight: "600" },
+  attributeChipTextActive: { color: "#FFFFFF" },
   productsHeading: {
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -539,6 +631,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   productPrice: { color: ACCENT, fontSize: 14, fontWeight: "800" },
+  specMeta: { color: INK, fontSize: 9, marginTop: 3 },
   stockText: { color: MUTED, fontSize: 9, marginTop: 3 },
   soldCountText: { color: MUTED, fontSize: 9, marginTop: 3 },
   addButton: {
